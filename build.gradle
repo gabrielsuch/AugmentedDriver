@@ -19,13 +19,9 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
-signing {
-    sign configurations.archives
-}
-
 group = "com.salesforceiq.augmenteddriver"
 archivesBaseName = "augmenteddriver"
-version = "1.0.17"
+version = "1.0.18"
 
 artifacts {
     archives javadocJar, sourcesJar
@@ -49,6 +45,7 @@ jar {
             it.isDirectory() ? it : zipTree(it)
         }
     }
+
     baseName = 'AugmentedDriver'
     version = '0.1'
 }

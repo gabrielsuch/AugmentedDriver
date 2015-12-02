@@ -1,6 +1,5 @@
 package com.salesforceiq.augmenteddriver.integrations;
 
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -10,14 +9,18 @@ import com.google.inject.Singleton;
 @Singleton
 public class IntegrationFactory {
 
-    private final SauceLabsIntegration sauceLabsIntegration;
-    private final TeamCityIntegration teamCityIntegration;
+    @Inject(optional = true)
+    private SauceLabsIntegration sauceLabsIntegration;
 
-    @Inject
-    public IntegrationFactory(SauceLabsIntegration sauceLabsIntegration,
-                              TeamCityIntegration teamCityIntegration) {
-        this.sauceLabsIntegration = Preconditions.checkNotNull(sauceLabsIntegration);;
-        this.teamCityIntegration = Preconditions.checkNotNull(teamCityIntegration);
+    @Inject(optional = true)
+    private TeamCityIntegration teamCityIntegration;
+
+    public boolean isSauceLabsEnabled() {
+        return sauceLabs() != null && sauceLabs().isEnabled();
+    }
+
+    public boolean isTeamCityEnabled() {
+        return teamCity() != null && teamCity().isEnabled();
     }
 
     /**
@@ -33,4 +36,5 @@ public class IntegrationFactory {
     public TeamCityIntegration teamCity() {
         return teamCityIntegration;
     }
+
 }

@@ -1,7 +1,7 @@
 package com.salesforceiq.augmenteddriver.testcases;
 
 import com.salesforceiq.augmenteddriver.asserts.AugmentedAssert;
-import com.salesforceiq.augmenteddriver.guice.GuiceModules;
+import com.salesforceiq.augmenteddriver.annotations.GuiceModules;
 import com.salesforceiq.augmenteddriver.integrations.IntegrationFactory;
 import com.salesforceiq.augmenteddriver.mobile.android.*;
 import com.salesforceiq.augmenteddriver.mobile.android.pageobjects.*;
@@ -86,11 +86,11 @@ public class AugmentedAndroidTestCase extends AugmentedBaseTestCase implements A
         LOG.info("AugmentedAndroidDriver created in " + Util.TO_PRETTY_FORNAT.apply(System.currentTimeMillis() - start));
 
         sessionId = driver.getSessionId().toString();
-        if (integrations.sauceLabs().isEnabled()) {
+        if (integrations.isSauceLabsEnabled()) {
             integrations.sauceLabs().jobName(getFullTestName(), sessionId);
             integrations.sauceLabs().buildName(getUniqueId(), sessionId);
         }
-        if (integrations.teamCity().isEnabled() && integrations.sauceLabs().isEnabled()) {
+        if (integrations.isTeamCityEnabled() && integrations.isSauceLabsEnabled()) {
             integrations.teamCity().printSessionId(getFullTestName(), sessionId);
         }
     }

@@ -1,15 +1,15 @@
 package com.salesforceiq.augmenteddriver.testcases;
 
-import com.salesforceiq.augmenteddriver.asserts.AugmentedAssertInterface;
-import com.salesforceiq.augmenteddriver.guice.GuiceTestRunner;
-import com.salesforceiq.augmenteddriver.integrations.IntegrationFactory;
-import com.salesforceiq.augmenteddriver.modules.PropertiesModule;
-import com.salesforceiq.augmenteddriver.util.CommandLineArguments;
-import com.salesforceiq.augmenteddriver.util.Util;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.salesforceiq.augmenteddriver.asserts.AugmentedAssertInterface;
+import com.salesforceiq.augmenteddriver.integrations.IntegrationFactory;
+import com.salesforceiq.augmenteddriver.modules.PropertiesModule;
+import com.salesforceiq.augmenteddriver.runners.AugmentedJUnitRunner;
+import com.salesforceiq.augmenteddriver.util.CommandLineArguments;
+import com.salesforceiq.augmenteddriver.util.Util;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.junit.rules.TestWatcher;
@@ -24,7 +24,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
  *     No one should extend from this, AugmentedWebTestCase or the like should be used.
  * </p>
  */
-@RunWith(GuiceTestRunner.class)
+@RunWith(AugmentedJUnitRunner.class)
 public abstract class AugmentedBaseTestCase implements AugmentedAssertInterface {
 
     @Rule
@@ -90,14 +90,14 @@ public abstract class AugmentedBaseTestCase implements AugmentedAssertInterface 
     public TestWatcher testWatcher = new TestWatcher() {
         @Override
         protected void failed(Throwable e, Description description) {
-            if (integrations.sauceLabs().isEnabled() && !Strings.isNullOrEmpty(sessionId)) {
+            if (integrations.isSauceLabsEnabled() && !Strings.isNullOrEmpty(sessionId)) {
                 integrations.sauceLabs().testPassed(false, sessionId);
             }
         }
 
         @Override
         protected void succeeded(Description description) {
-            if (integrations.sauceLabs().isEnabled() && !Strings.isNullOrEmpty(sessionId)) {
+            if (integrations.isSauceLabsEnabled() && !Strings.isNullOrEmpty(sessionId)) {
                 integrations.sauceLabs().testPassed(true, sessionId);
             }
         }

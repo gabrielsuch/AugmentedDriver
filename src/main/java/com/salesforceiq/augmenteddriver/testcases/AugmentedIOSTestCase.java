@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.salesforceiq.augmenteddriver.asserts.AugmentedAssert;
-import com.salesforceiq.augmenteddriver.guice.GuiceModules;
+import com.salesforceiq.augmenteddriver.annotations.GuiceModules;
 import com.salesforceiq.augmenteddriver.integrations.IntegrationFactory;
 import com.salesforceiq.augmenteddriver.mobile.ios.*;
 import com.salesforceiq.augmenteddriver.mobile.ios.pageobjects.IOSPageContainerObject;
@@ -82,11 +82,11 @@ public class AugmentedIOSTestCase extends AugmentedBaseTestCase implements IOSPa
         LOG.info("AugmentedIOSDriver created in " + Util.TO_PRETTY_FORNAT.apply(System.currentTimeMillis() - start));
 
         sessionId = driver.getSessionId().toString();
-        if (integrations.sauceLabs().isEnabled()) {
+        if (integrations.isSauceLabsEnabled()) {
             integrations.sauceLabs().jobName(getFullTestName(), sessionId);
             integrations.sauceLabs().buildName(getUniqueId(), sessionId);
         }
-        if (integrations.teamCity().isEnabled() && integrations.sauceLabs().isEnabled()) {
+        if (integrations.isTeamCityEnabled() && integrations.isSauceLabsEnabled()) {
             integrations.teamCity().printSessionId(getFullTestName(), sessionId);
         }
     }

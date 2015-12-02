@@ -3,12 +3,9 @@ package com.salesforceiq.augmenteddriver.modules;
 import com.google.common.base.Strings;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
-import com.saucelabs.saucerest.SauceREST;
 import com.salesforceiq.augmenteddriver.util.CommandLineArguments;
 import com.salesforceiq.augmenteddriver.util.Util;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -23,8 +20,6 @@ import java.util.Properties;
  * Guice Module that loads all the properties file.
  */
 public class PropertiesModule extends AbstractModule {
-    private static final Logger LOG = LoggerFactory.getLogger(PropertiesModule.class);
-
     public static final String TEAM_CITY_INTEGRATION = "TEAM_CITY_INTEGRATION";
     public static final String REPORTING = "REPORTING";
     public static final String REMOTE_ADDRESS = "REMOTE_ADDRESS";
@@ -60,6 +55,11 @@ public class PropertiesModule extends AbstractModule {
         defaultProperties.entrySet()
                 .stream()
                 .forEach(entry -> properties.setProperty(entry.getKey(), entry.getValue()));
+
+        if (CommandLineArguments.ARGUMENTS == null) {
+            throw new IllegalStateException("Arguments were not loaded. Please use @Capabilities or command line args.");
+        }
+
         Path propertiesPath = Paths.get(CommandLineArguments.ARGUMENTS.conf());
         if (Files.exists(propertiesPath)) {
             try {
@@ -76,15 +76,10 @@ public class PropertiesModule extends AbstractModule {
         } else {
             properties.setProperty(PropertiesModule.REMOTE_ADDRESS, properties.getProperty(PropertiesModule.LOCAL_ADDRESS));
         }
+
         Names.bindProperties(binder(), properties);
-
         bind(DesiredCapabilities.class).toInstance(CommandLineArguments.ARGUMENTS.capabilities());
-        bind(String.class)
-                .annotatedWith(Names.named(PropertiesModule.UNIQUE_ID))
-                .toInstance(ID);
-
-        // Always set SauceRest, even with empty user key, so Guice does not complain.
-        bind(SauceREST.class).toInstance(new SauceREST(properties.getProperty(PropertiesModule.SAUCE_USER), properties.getProperty(PropertiesModule.SAUCE_KEY)));
+        bind(String.class).annotatedWith(Names.named(PropertiesModule.UNIQUE_ID)).toInstance(ID);
     }
 
     /**
@@ -92,9 +87,11 @@ public class PropertiesModule extends AbstractModule {
      */
     private void setSauceProperties(Properties properties) {
         properties.setProperty(PropertiesModule.REMOTE_ADDRESS, properties.getProperty(PropertiesModule.SAUCE_ADDRESS));
+
         if (Strings.isNullOrEmpty(properties.getProperty(PropertiesModule.SAUCE_KEY))) {
             throw new IllegalArgumentException("To run on Sauce Labs, define SAUCE_KEY in the properties file");
         }
+
         if (Strings.isNullOrEmpty(properties.getProperty(PropertiesModule.SAUCE_USER))) {
             throw new IllegalArgumentException("To run on Sauce Labs, define SAUCE_USER in the properties file");
         }
@@ -103,7 +100,9 @@ public class PropertiesModule extends AbstractModule {
         if (!Strings.isNullOrEmpty(CommandLineArguments.ARGUMENTS.app())) {
             CommandLineArguments.ARGUMENTS.capabilities().setCapability("app", "sauce-storage:" + CommandLineArguments.ARGUMENTS.app());
         }
+
         CommandLineArguments.ARGUMENTS.capabilities().setCapability("username", properties.getProperty(PropertiesModule.SAUCE_USER));
         CommandLineArguments.ARGUMENTS.capabilities().setCapability("access-key", properties.getProperty(PropertiesModule.SAUCE_KEY));
     }
+
 }

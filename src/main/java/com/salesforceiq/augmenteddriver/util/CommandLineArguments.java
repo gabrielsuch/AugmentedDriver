@@ -37,6 +37,13 @@ public class CommandLineArguments {
         return ARGUMENTS;
     }
 
+    public static CommandLineArguments initializeForCapabilities(String path) {
+        CommandLineArguments result = new CommandLineArguments();
+        result.capabilities = new CapabilitiesConverter().convert(path);
+        ARGUMENTS = result;
+        return ARGUMENTS;
+    }
+
     public Class<?> clazz() {
         Preconditions.checkNotNull(ARGUMENTS, "Call CommandLineArguments#intialize first");
         return ARGUMENTS.clazz;

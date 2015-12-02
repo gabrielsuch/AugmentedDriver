@@ -19,8 +19,8 @@ public class SauceLabsModule extends AbstractModule {
     protected void configure() {
         Properties properties = new Properties();
         bind(SauceCommandLineArguments.class).toInstance(SauceCommandLineArguments.ARGUMENTS);
-
         Path propertiesPath = Paths.get(SauceCommandLineArguments.ARGUMENTS.conf());
+
         if (Files.exists(propertiesPath)) {
             try {
                 properties.load(new FileInputStream(propertiesPath.toFile()));
@@ -30,10 +30,14 @@ public class SauceLabsModule extends AbstractModule {
         } else {
             throw new IllegalArgumentException("Properties file does not exist " + propertiesPath);
         }
+
         String sauceKey = properties.getProperty(PropertiesModule.SAUCE_KEY);
         String sauceUser = properties.getProperty(PropertiesModule.SAUCE_USER);
+
         Preconditions.checkArgument(!Strings.isNullOrEmpty(sauceKey), String.format("Set %s in the properties file", PropertiesModule.SAUCE_KEY));
         Preconditions.checkArgument(!Strings.isNullOrEmpty(sauceUser), String.format("Set %s in the properties file", PropertiesModule.SAUCE_USER));
-        bind(SauceREST.class).toInstance(new SauceREST(properties.getProperty(PropertiesModule.SAUCE_USER), properties.getProperty(PropertiesModule.SAUCE_KEY)));
+
+        bind(SauceREST.class).toInstance(new SauceREST(sauceUser, sauceKey));
     }
+
 }
