@@ -39,10 +39,11 @@ public class SaucelabsModule extends AbstractIntegrationModule {
     @Override
     protected void configureActions() {
         if (!CommandLineArguments.ARGUMENTS.sauce()) {
-            LOG.info("Sauce is false on properties. Ignoring module.");
+            LOG.info("Sauce is false on properties. Ignoring SauceLabs module.");
             return;
         }
 
+        LOG.info("SauceLabs enabled. Test will be executed remotely.");
         Properties properties = new Properties();
 
         defaultProperties.entrySet()
@@ -70,16 +71,6 @@ public class SaucelabsModule extends AbstractIntegrationModule {
         }
 
         setSauceProperties(properties);
-
-        String sauceKey = properties.getProperty(SAUCE_KEY);
-        String sauceUser = properties.getProperty(SAUCE_USER);
-
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(sauceKey), String.format("Set %s in the properties file", SAUCE_KEY));
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(sauceUser), String.format("Set %s in the properties file", SAUCE_USER));
-
-        bind(SauceREST.class).toInstance(new SauceREST(sauceUser, sauceKey));
-        bind(SauceCommandLineArguments.class).toInstance(SauceCommandLineArguments.ARGUMENTS);
-        bindIntegration().to(SauceLabsIntegration.class);
     }
 
     /**
@@ -103,6 +94,16 @@ public class SaucelabsModule extends AbstractIntegrationModule {
 
         CommandLineArguments.ARGUMENTS.capabilities().setCapability("username", properties.getProperty(SAUCE_USER));
         CommandLineArguments.ARGUMENTS.capabilities().setCapability("access-key", properties.getProperty(SAUCE_KEY));
+
+        String sauceKey = properties.getProperty(SAUCE_KEY);
+        String sauceUser = properties.getProperty(SAUCE_USER);
+
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(sauceKey), String.format("Set %s in the properties file", SAUCE_KEY));
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(sauceUser), String.format("Set %s in the properties file", SAUCE_USER));
+
+        bind(SauceREST.class).toInstance(new SauceREST(sauceUser, sauceKey));
+        bind(SauceCommandLineArguments.class).toInstance(SauceCommandLineArguments.ARGUMENTS);
+        bindIntegration().to(SauceLabsIntegration.class);
     }
 
 }
