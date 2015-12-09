@@ -49,7 +49,7 @@ public class TestRunner implements Callable<AugmentedResult> {
         try {
             LOG.info(String.format("STARTING Test %s", testName));
             Result result = jUnitCore.run(Request.method(test.getDeclaringClass(), test.getName()));
-            LOG.info(String.format("FINSHED Test %s in %s", testName, Util.TO_PRETTY_FORNAT.apply(System.currentTimeMillis() - start)));
+            LOG.info(String.format("FINISHED Test %s in %s", testName, Util.TO_PRETTY_FORNAT.apply(System.currentTimeMillis() - start)));
 
             return new AugmentedResult(result, outputStream);
         } finally {
