@@ -5,8 +5,9 @@ import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.saucelabs.saucerest.SauceREST;
+import com.salesforceiq.augmenteddriver.modules.SaucelabsModule;
 import com.salesforceiq.augmenteddriver.util.Util;
+import com.saucelabs.saucerest.SauceREST;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,7 @@ public class SauceLabsUploader {
         SauceCommandLineArguments arguments = SauceCommandLineArguments.initialize(args);
         checkArguments(arguments);
 
-        List<Module> modules = Lists.newArrayList(new SauceLabsModule());
+        List<Module> modules = Lists.newArrayList(new SaucelabsModule());
         Injector injector = Guice.createInjector(modules);
         SauceREST sauceREST = injector.getInstance(SauceREST.class);
         long start = System.currentTimeMillis();

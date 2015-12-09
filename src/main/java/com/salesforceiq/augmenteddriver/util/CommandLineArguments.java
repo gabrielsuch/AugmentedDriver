@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * For parsing command line arguments.
@@ -24,8 +25,14 @@ import java.util.List;
  */
 public class CommandLineArguments {
 
-    private static Class<?> hackClass;
+    static class ParserProperties {
+        public static final String CAPABILITIES = "CAPABILITIES";
+        public static final String SAUCE = "SAUCE";
+    }
+
+    public static final String DEFAULT_CONFIG = "conf/augmented.properties";
     public static CommandLineArguments ARGUMENTS;
+    private static Class<?> hackClass;
 
     public static CommandLineArguments initialize(String[] args) {
         CommandLineArguments result = new CommandLineArguments();
@@ -37,9 +44,17 @@ public class CommandLineArguments {
         return ARGUMENTS;
     }
 
-    public static CommandLineArguments initializeForCapabilities(String path) {
+    public static CommandLineArguments initialize(Properties properties) {
         CommandLineArguments result = new CommandLineArguments();
-        result.capabilities = new CapabilitiesConverter().convert(path);
+
+        if (properties.get(ParserProperties.CAPABILITIES) != null) {
+            result.capabilities = new CapabilitiesConverter().convert((String) properties.get(ParserProperties.CAPABILITIES));
+        }
+
+        if (properties.get(ParserProperties.SAUCE) != null) {
+            result.sauce = Boolean.valueOf((String) properties.get(ParserProperties.SAUCE));
+        }
+
         ARGUMENTS = result;
         return ARGUMENTS;
     }
@@ -135,7 +150,7 @@ public class CommandLineArguments {
     private DesiredCapabilities capabilities;
 
     @Parameter(names = "-conf", description = "Path to the properties file, conf/augmented.properties by default")
-    private String conf = "conf/augmented.properties";
+    private String conf = DEFAULT_CONFIG;
 
     @Parameter(names = "-app", description = "Path to file to use as app (IOS) or apk (Android)")
     private String app = "";

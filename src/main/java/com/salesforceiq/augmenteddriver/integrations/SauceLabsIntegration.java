@@ -7,6 +7,8 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.saucelabs.saucerest.SauceREST;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,6 +20,8 @@ import java.util.Map;
  */
 @Singleton
 public class SauceLabsIntegration implements Integration {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SauceLabsIntegration.class);
 
     private final SauceREST sauceRest;
     private final CommandLineArguments arguments;
@@ -32,6 +36,7 @@ public class SauceLabsIntegration implements Integration {
      * Sets the job name
      */
     public void jobName(String jobName, String sessionId) {
+        LOG.info("Set Job Name: " + jobName + " - SessionID: " + sessionId);
         update("name", jobName, sessionId);
     }
 
@@ -39,6 +44,8 @@ public class SauceLabsIntegration implements Integration {
      * Sets whether the test passed or not.
      */
     public void testPassed(boolean testPassed, String sessionId) {
+        String result = testPassed ? "SUCCESS" : "FAILURE";
+        LOG.info("Set test result: " + result + " - SessionID: " + sessionId);
         update("passed", testPassed, sessionId);
     }
 
@@ -46,6 +53,7 @@ public class SauceLabsIntegration implements Integration {
      * Sets the build name
      */
     public void buildName(String buildName, String sessionId) {
+        LOG.info("Set buildName: " + buildName + " - SessionID: " + sessionId);
         update("build", buildName, sessionId);
     }
 
@@ -56,6 +64,8 @@ public class SauceLabsIntegration implements Integration {
         Preconditions.checkNotNull(fileToUpload);
         Preconditions.checkArgument(Files.exists(fileToUpload));
         Preconditions.checkArgument(!Strings.isNullOrEmpty(destinationFileName));
+
+        LOG.info("Uploading file: " + fileToUpload + " - destinationFileName: " + destinationFileName);
         uploadFile(fileToUpload, destinationFileName, true);
     }
 
@@ -68,6 +78,7 @@ public class SauceLabsIntegration implements Integration {
         Preconditions.checkNotNull(fileToUpload);
         Preconditions.checkArgument(Files.exists(fileToUpload));
         Preconditions.checkArgument(!Strings.isNullOrEmpty(destinationFileName));
+
         sauceRest.uploadFile(fileToUpload.toFile(), destinationFileName, overwrite);
     }
 
@@ -76,8 +87,11 @@ public class SauceLabsIntegration implements Integration {
             Preconditions.checkArgument(!Strings.isNullOrEmpty(sessionId));
             Preconditions.checkArgument(!Strings.isNullOrEmpty(key));
             Preconditions.checkNotNull(value);
+
             Map<String, Object> updates = Maps.newHashMap();
             updates.put(key, value);
+
+            LOG.info("Updating Job Info with SessionID: " + sessionId + " - Updates: " + updates);
             sauceRest.updateJobInfo(sessionId, updates);
         }
     }
@@ -86,4 +100,5 @@ public class SauceLabsIntegration implements Integration {
     public boolean isEnabled() {
         return arguments.sauce();
     }
+
 }

@@ -6,6 +6,7 @@ import com.beust.jcommander.converters.PathConverter;
 import com.google.common.base.Preconditions;
 
 import java.nio.file.Path;
+import java.util.Properties;
 
 public class SauceCommandLineArguments {
 
@@ -21,18 +22,34 @@ public class SauceCommandLineArguments {
         return ARGUMENTS;
     }
 
+    public static SauceCommandLineArguments initialize(Properties properties) {
+        SauceCommandLineArguments result = new SauceCommandLineArguments();
+
+        if (properties.get("saucelabs.overwrite") != null) {
+            result.overwrite = Boolean.valueOf(properties.getProperty("saucelabs.overwrite"));
+        }
+
+        if (properties.get("saucelabs.conf") != null) {
+            result.conf = properties.getProperty("saucelabs.conf");
+        }
+
+        ARGUMENTS = result;
+
+        return ARGUMENTS;
+    }
+
     public Path file() {
-        Preconditions.checkNotNull(ARGUMENTS, "Call CommandLineArguments#intialize first");
+        Preconditions.checkNotNull(ARGUMENTS, "Call CommandLineArguments#initialize first");
         return ARGUMENTS.fileToUpload;
     }
 
     public boolean overwrite() {
-        Preconditions.checkNotNull(ARGUMENTS, "Call CommandLineArguments#intialize first");
+        Preconditions.checkNotNull(ARGUMENTS, "Call CommandLineArguments#initialize first");
         return ARGUMENTS.overwrite;
     }
 
     public String conf() {
-        Preconditions.checkNotNull(ARGUMENTS, "Call CommandLineArguments#intialize first");
+        Preconditions.checkNotNull(ARGUMENTS, "Call CommandLineArguments#initialize first");
         return ARGUMENTS.conf;
     }
 
@@ -44,4 +61,5 @@ public class SauceCommandLineArguments {
 
     @Parameter(names = "-conf", description = "Path to the properties file, conf/tesyui.properties by default")
     private String conf = "conf/augmented.properties";
+
 }

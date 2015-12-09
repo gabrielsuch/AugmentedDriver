@@ -1,22 +1,17 @@
 package com.salesforceiq.augmenteddriver.testcases;
 
-import com.salesforceiq.augmenteddriver.asserts.AugmentedAssert;
-import com.salesforceiq.augmenteddriver.annotations.GuiceModules;
-import com.salesforceiq.augmenteddriver.integrations.IntegrationFactory;
-import com.salesforceiq.augmenteddriver.mobile.android.*;
-import com.salesforceiq.augmenteddriver.mobile.android.pageobjects.*;
-import com.salesforceiq.augmenteddriver.modules.AugmentedAndroidDriverModule;
-import com.salesforceiq.augmenteddriver.modules.PropertiesModule;
-import com.salesforceiq.augmenteddriver.util.CommandLineArguments;
-import com.salesforceiq.augmenteddriver.util.Util;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.name.Named;
-import org.junit.After;
-import org.junit.Before;
+import com.salesforceiq.augmenteddriver.annotations.GuiceModules;
+import com.salesforceiq.augmenteddriver.asserts.AugmentedAssert;
+import com.salesforceiq.augmenteddriver.mobile.android.*;
+import com.salesforceiq.augmenteddriver.mobile.android.pageobjects.AndroidPageContainerObject;
+import com.salesforceiq.augmenteddriver.mobile.android.pageobjects.AndroidPageObject;
+import com.salesforceiq.augmenteddriver.mobile.android.pageobjects.AndroidPageObjectActions;
+import com.salesforceiq.augmenteddriver.mobile.android.pageobjects.AndroidPageObjectActionsInterface;
+import com.salesforceiq.augmenteddriver.modules.AugmentedAndroidDriverModule;
+import com.salesforceiq.augmenteddriver.modules.PropertiesModule;
 import org.openqa.selenium.By;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +25,7 @@ public class AugmentedAndroidTestCase extends AugmentedBaseTestCase implements A
     private static final Logger LOG = LoggerFactory.getLogger(AugmentedAndroidTestCase.class);
 
     private AugmentedAndroidDriver driver;
+    private AugmentedAndroidFunctions augmentedAndroidFunctions;
 
     @Inject
     private AugmentedAndroidDriverProvider augmentedAndroidDriverProvider;
@@ -37,69 +33,29 @@ public class AugmentedAndroidTestCase extends AugmentedBaseTestCase implements A
     @Inject
     private AugmentedAndroidFunctionsFactory augmentedAndroidFunctionsFactory;
 
-    private AugmentedAndroidFunctions augmentedAndroidFunctions;
-
-    @Named(PropertiesModule.REMOTE_ADDRESS)
-    @Inject
-    private String remoteAddress;
-
-    @Inject
-    private DesiredCapabilities capabilities;
-
     @Inject
     private AndroidPageObjectActions androidPageObjectActions;
 
-    @Inject
-    private IntegrationFactory integrations;
-
-    @Inject
-    private CommandLineArguments arguments;
-
-    @Inject
-    private Injector injector;
-
-    /**
-     * <p>
-     *     IMPORTANT, the session of the driver is set after the driver is initialized.
-     * </p>
-     */
-    @Before
-    public void setUp() throws MalformedURLException {
-        Preconditions.checkNotNull(augmentedAndroidDriverProvider);
-        Preconditions.checkNotNull(integrations);
-        Preconditions.checkNotNull(arguments);
-        Preconditions.checkNotNull(androidPageObjectActions);
-        Preconditions.checkNotNull(remoteAddress);
-        Preconditions.checkNotNull(capabilities);
-
-        long start = System.currentTimeMillis();
-        LOG.info("Creating AugmentedAndroidDriver");
-        try {
-            driver = new AugmentedAndroidDriver(remoteAddress, capabilities, augmentedAndroidFunctions);
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("Check your addresses on the properties file", e);
-        }
-        augmentedAndroidFunctions= augmentedAndroidFunctionsFactory.create(driver);
-        driver.setAugmentedFunctions(augmentedAndroidFunctions);
-
-        augmentedAndroidDriverProvider.set(driver);
-        LOG.info("AugmentedAndroidDriver created in " + Util.TO_PRETTY_FORNAT.apply(System.currentTimeMillis() - start));
-
-        sessionId = driver.getSessionId().toString();
-        if (integrations.isSauceLabsEnabled()) {
-            integrations.sauceLabs().jobName(getFullTestName(), sessionId);
-            integrations.sauceLabs().buildName(getUniqueId(), sessionId);
-        }
-        if (integrations.isTeamCityEnabled() && integrations.isSauceLabsEnabled()) {
-            integrations.teamCity().printSessionId(getFullTestName(), sessionId);
-        }
+    @Override
+    protected Logger logger() {
+        return LOG;
     }
 
-    @After
-    public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
+    @Override
+    protected void initializeDriver() throws MalformedURLException {
+        this.driver = new AugmentedAndroidDriver(remoteAddress, capabilities, augmentedAndroidFunctions);
+        this.augmentedAndroidFunctions= augmentedAndroidFunctionsFactory.create(driver);
+
+        driver.setAugmentedFunctions(augmentedAndroidFunctions);
+        augmentedAndroidDriverProvider.set(driver);
+
+        this.sessionId = driver.getSessionId().toString();
+    }
+
+    @Override
+    protected void closeDriver() {
+        if (driver == null) return;
+        driver.close();
     }
 
     @Override
@@ -191,5 +147,6 @@ public class AugmentedAndroidTestCase extends AugmentedBaseTestCase implements A
     public void assertElementIsNotPresent(By by) {
         AugmentedAssert.assertElementIsNotPresentAfter(augmented(), by, waitTimeInSeconds());
     }
+
 }
 
