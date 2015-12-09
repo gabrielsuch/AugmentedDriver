@@ -71,10 +71,6 @@ public class PropertiesModule extends AbstractModule {
             throw new IllegalStateException("Capabilities were not loaded. Please set on properties file or command line args.");
         }
 
-        if (!CommandLineArguments.ARGUMENTS.sauce() && (properties.get("SAUCE") == null)) {
-            properties.setProperty(PropertiesModule.REMOTE_ADDRESS, properties.getProperty(PropertiesModule.LOCAL_ADDRESS));
-        }
-
         Names.bindProperties(binder(), properties);
         bind(DesiredCapabilities.class).toInstance(CommandLineArguments.ARGUMENTS.capabilities());
         bind(String.class).annotatedWith(Names.named(PropertiesModule.UNIQUE_ID)).toInstance(ID);
