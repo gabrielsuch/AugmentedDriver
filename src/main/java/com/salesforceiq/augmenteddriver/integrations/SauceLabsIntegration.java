@@ -36,8 +36,9 @@ public class SauceLabsIntegration implements Integration {
      * Sets the job name
      */
     public void jobName(String jobName, String sessionId) {
-        LOG.info("Set Job Name: " + jobName + " - SessionID: " + sessionId);
         update("name", jobName, sessionId);
+        String message = String.format("SauceOnDemandSessionID=%1$s job-name=%2$s", sessionId, jobName);
+        System.out.println(message); // System.out.println required by a plugin
     }
 
     /**
